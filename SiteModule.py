@@ -5,24 +5,6 @@ date = datetime.datetime.now()
 time_out_limit = 10
 
 class SiteCommands(object):
-    '''
-    def __init__(self):
-        self.store_id = None
-        self.order_type = None
-        self.company_name = None
-        self.first_name = None
-        self.last_name = None
-        self.address_1 = None
-        self.address_2 = None
-        self.city = None
-        self.state = None
-        self.zip = None
-        self.email = None
-        self.confirm_email = None
-        self.phone = None
-        self.ship_service = None
-        '''
-
 
     def find_element_by_link_text_click(browser, txt):
         time_out = (date.now().second + time_out_limit) % 60
@@ -78,11 +60,11 @@ class SiteCommands(object):
 
     def find_element_by_id(browser, id):
         found_element = None
-        time_out = (date_obj.now().second + time_out_limit) % 60
+        time_out = (date.now().second + time_out_limit) % 60
 
         while True:
             try:
-                if date_obj.now().second == time_out:
+                if date.now().second == time_out:
                     print('Error: Site timed out')
                     break
 

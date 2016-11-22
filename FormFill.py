@@ -82,7 +82,25 @@ class TmoSupport(object):
         SiteCommands.find_element_by_link_text_click(browser, 'click here')
         return None
 
-    def get_form_elements(self, browser, form_elements):
+    def get_form_elements(self, browser):
+        self.e_store_id = SiteCommands.find_element_by_id(browser, 'storeid')
+        self.e_order_type = SiteCommands.find_element_by_id(browser, 'sgevordertypeid')
+
+        self.e_company_name = SiteCommands.find_element_by_id(browser, 'eucompany') #browser.find_element_by_id('eucompany')
+
+        self.e_first_name = SiteCommands.find_element_by_id(browser, 'eufname') #browser.find_element_by_id('eufname')
+        self.e_last_name = SiteCommands.find_element_by_id(browser, 'eulname') #browser.find_element_by_id('eulname')
+
+        self.e_address_1 = SiteCommands.find_element_by_id(browser, 'euaddr1') #browser.find_element_by_id('euaddr1')
+        self.e_address_2 = SiteCommands.find_element_by_id(browser, 'euaddr2') #browser.find_element_by_id('euaddr2')
+
+        self.e_city = SiteCommands.find_element_by_id(browser, 'eucity') #browser.find_element_by_id('eucity')
+        #state = browser.find_element_by_id('')
+        self.e_zipcode = SiteCommands.find_element_by_id(browser, 'euzip') #browser.find_element_by_id('euzip')
+        self.e_email = SiteCommands.find_element_by_id(browser, 'euemail1' ) #browser.find_element_by_id('euemail1')
+        self.e_confirm_email = SiteCommands.find_element_by_id(browser, 'euemail2') #browser.find_element_by_id('euemail2')
+        self.e_phone = SiteCommands.find_element_by_id(browser, 'euphone') #browser.find_element_by_id('euphone')
+        self.e_ship_service = SiteCommands.find_element_by_id(browser, 'svcidus') #browser.find_element_by_id('svcidus')
         return None
 
     def fill_form(self, orders):
@@ -109,15 +127,15 @@ class FormFill(object):
             'tmo 16.8',
             ]
 
-
     #login to site where the form to fill exists
     def login(self, url, user_login, user_pass): #login first
         self.browser.get(url)
         username = SiteCommands.find_element_by_name(self.browser, 'username')
         password = SiteCommands.find_element_by_name(self.browser, 'password')
 
-        SiteCommands.send_keys(username, user_login, 0) #enters username into field
-        SiteCommands.send_keys(password, user_pass, 0) #enters password into field
+        pause_time = 0 #time to pause between sending each key
+        SiteCommands.send_keys(username, user_login, pause_time) #enters username into field
+        SiteCommands.send_keys(password, user_pass, pause_time) #enters password into field
         password.submit() #logs user in
 
         return None
@@ -133,10 +151,10 @@ class FormFill(object):
         return None
 
 
-    def get_form_elements(self, form_name): #use after navigating to form page
-        if form_name in self.supported_forms:
-            if form_name == 'tmo 16.8':
-                pass #TmoSupport.get_form_elements(self.browser, )
+    def get_form_elements(self): #use after navigating to form page
+        self.program_form.get_form_elements(self.browser)
+        #^THIS CALL AND PARAMETERS SHOULD BE THE SAME, REGARDLESS OF THE PROGRAM.
+        #THIS WILL KEEP IT SIMPLE SO THERE WON'T HAVE TO BE A TON OF CHECKS TO DETERMINE WHICH FORM VALUES TO USE.
 
         return None
 
