@@ -2,15 +2,18 @@ from selenium import webdriver
 from ExcelModule import ExcelCommands
 import openpyxl
 import time
-import datetime.datetime
+import datetime
+from SiteModule import SiteCommands
+import FormFill
+from FormFill import FormFill
 
 date_obj = datetime.datetime.now()
-time_out_limit = 5 #number of seconds before the site times out from trying to find an element
+time_out_limit = 10 #number of seconds before the site times out from trying to find an element
 
 def login(browser, url, user_login, user_pass):
     browser.get(url)
-    username = browser.find_element_by_name('username')
-    password = browser.find_element_by_name('password')
+    username = find_element_by_name(browser, 'username')
+    password = find_element_by_name(browser, 'password')
 
     username.send_keys(user_login)
     password.send_keys(user_pass)
@@ -18,18 +21,17 @@ def login(browser, url, user_login, user_pass):
 
     return None
 
-
-def find_element_by_link_text_click(browser, link_txt):
-    time_out = (date_obj.now().seconds + time_out_limit) % 60
+def find_element_by_link_text_click(browser, txt):
+    time_out = (date_obj.now().second + time_out_limit) % 60
     error_info = '' #sends error info through return
 
     while True:
         try:
-            if date_obj.now().seconds == time_out:
-                error_info = 'Error: Site timed out'
+            if date_obj.now().second == time_out:
+                print('Error: Site timed out')
                 break
 
-            browser.find_element_by_link_text(link_txt).click()
+            browser.find_element_by_link_text(txt).click()
             break
 
         except Exception as e:
@@ -37,34 +39,50 @@ def find_element_by_link_text_click(browser, link_txt):
 
     return error_info
 
-def find_element_by_id_click(browser, id):
-    time_out = (date_obj.now().seconds + time_out_limit) % 60
+def find_element_by_id_click(browser, id_name):
+    time_out = (date_obj.now().second + time_out_limit) % 60
     error_info = '' #sends error info through return
 
     while True:
         try:
-            if date_obj.now().seconds == time_out:
-                error_info = 'Error: Site timed out'
+            if date_obj.now().second == time_out:
+                print('Error: Site timed out')
                 break
 
-            browser.find_element_by_id(id)
+            browser.find_element_by_id(id_name).click()
             break
 
         except Exception as e:
             pass
 
     return error_info
+
+def find_element_by_name(browser, name):
+    found_element = None
+    time_out = (date_obj.now().second + time_out_limit) % 60
+
+    while True:
+        try:
+            if date_obj.now().second == time_out:
+                print('Error: Site timed out')
+                break
+
+            found_element = browser.find_element_by_name(name)
+            break
+
+        except Exception as e:
+            pass
+
+    return found_element
 
 def find_element_by_id(browser, id):
     found_element = None
-
-    time_out = (date_obj.now().seconds + time_out_limit) % 60
-    error_info = '' #sends error info through return
+    time_out = (date_obj.now().second + time_out_limit) % 60
 
     while True:
         try:
-            if date_obj.now().seconds == time_out:
-                error_info = 'Error: Site timed out'
+            if date_obj.now().second == time_out:
+                print('Error: Site timed out')
                 break
 
             found_element = browser.find_element_by_id(id)
@@ -78,25 +96,19 @@ def find_element_by_id(browser, id):
 def program_selection(browser, url):
     browser.get(url)
     time.sleep(1)
-    program_name = browser.find_element_by_name('name')
+    program_name = find_element_by_name(browser, 'name') #browser.find_element_by_name('name')
     program_name.send_keys('ssp16.8_tmo')
     program_name.submit()
     time.sleep(1.5)
 
-    form_elements = ['userrow-22661', 'umlogin']
+    find_element_by_id_click(browser, 'userrow-22661')
+    find_element_by_id_click(browser, 'umlogin')
 
-    for e in form_elements:
-        browser.find_element_by_id(e).click()
-        time.sleep(2)
-
-    while True:
-        try:
-            browser.find_element_by_link_text('click here').click()
-            break
-        except Exception as e:
-            pass
-
+    print('found form click elements')
     time.sleep(1.5)
+    find_element_by_link_text_click(browser, 'click here')
+
+    print('past link text click')
 
     return None
 
@@ -112,7 +124,7 @@ def find_site_elements(browser):
     if browser is not None:
         print('start collecting browser elements')
         #store_id = browser.find_element_by_id('storeid')
-        store_id = find_elemnt_by_id(browser, 'storeid')
+        store_id = find_element_by_id(browser, 'storeid')
         #order_type = browser.find_element_by_id('sgevordertypeid')
         order_type = find_element_by_id(browser, 'sgevordertypeid')
 
@@ -180,7 +192,7 @@ def tmo_form_fill(browser = None, wb_name = ''):
         default_last_name = 'Operations Associate'
         default_email = 'aaa@viennachannels.com'
         default_phone = '409-622-3620'
-        default_ship_service = ['f', 'f', 'f'] #keys to send for 2 day shipping
+        default_ship_service = 'fff' #keys to send for 2 day shipping
 
         #make so it also keeps the value of the cell, and not just the position
         #of the cell
@@ -193,26 +205,26 @@ def tmo_form_fill(browser = None, wb_name = ''):
 
         if browser is not None:
             print('start collecting browser elements')
-            store_id = browser.find_element_by_id('storeid')
-            order_type = browser.find_element_by_id('sgevordertypeid')
+            #store_id = browser.find_element_by_id('storeid')
+            store_id = find_element_by_id(browser, 'storeid')
+            #order_type = browser.find_element_by_id('sgevordertypeid')
+            order_type = find_element_by_id(browser, 'sgevordertypeid')
 
-            company_name = browser.find_element_by_id('eucompany')
+            company_name = find_element_by_id(browser, 'eucompany') #browser.find_element_by_id('eucompany')
 
-            first_name = browser.find_element_by_id('eufname')
-            last_name = browser.find_element_by_id('eulname')
+            first_name = find_element_by_id(browser, 'eufname') #browser.find_element_by_id('eufname')
+            last_name = find_element_by_id(browser, 'eulname') #browser.find_element_by_id('eulname')
 
-            address_1 = browser.find_element_by_id('euaddr1')
+            address_1 = find_element_by_id(browser, 'euaddr1') #browser.find_element_by_id('euaddr1')
+            address_2 = find_element_by_id(browser, 'euaddr2') #browser.find_element_by_id('euaddr2')
 
-
-            address_2 = browser.find_element_by_id('euaddr2')
-
-            city = browser.find_element_by_id('eucity')
+            city = find_element_by_id(browser, 'eucity') #browser.find_element_by_id('eucity')
             #state = browser.find_element_by_id('')
-            zipcode = browser.find_element_by_id('euzip')
-            email_address = browser.find_element_by_id('euemail1')
-            confirm_email = browser.find_element_by_id('euemail2')
-            phone = browser.find_element_by_id('euphone')
-            ship_service = browser.find_element_by_id('svcidus')
+            zipcode = find_element_by_id(browser, 'euzip') #browser.find_element_by_id('euzip')
+            email_address = find_element_by_id(browser, 'euemail1' ) #browser.find_element_by_id('euemail1')
+            confirm_email = find_element_by_id(browser, 'euemail2') #browser.find_element_by_id('euemail2')
+            phone = find_element_by_id(browser, 'euphone') #browser.find_element_by_id('euphone')
+            ship_service = find_element_by_id(browser, 'svcidus') #browser.find_element_by_id('svcidus')
 
             #determine this by googling the address, finding what type of property the
             #recepient is on. If unable to determine, send a dialog message to the user
@@ -243,8 +255,6 @@ def tmo_form_fill(browser = None, wb_name = ''):
 
             print('finished sending excel keys')
 
-            #ship_service.send_keys(default_ship_service)
-
 
     except Exception as e:
         print('tmo form fill error')
@@ -253,16 +263,19 @@ def tmo_form_fill(browser = None, wb_name = ''):
     return None
 
 def main():
-    browser = webdriver.Firefox()
+    #browser = webdriver.Firefox()
     username = 'zniemann'
     password = 'paluxy61'
     login_url = r'https://www.viennachannels.com/adminlogin.php'
     program_url = r'https://www.viennachannels.com/vca/user_mgmt.php'
     xlsx_file = r'tmo_shipment_details.xlsx'
 
-    login(browser, login_url, username, password)
-    program_selection(browser, program_url)
-    tmo_form_fill(browser, xlsx_file)
+    form_data = FormFill()
+    form_data.login(login_url, username, password)
+    form_data.navigate_to_form(program_url, 'tmo 16.8')
+    #login(browser, login_url, username, password)
+    #program_selection(browser, program_url)
+    #tmo_form_fill(browser, xlsx_file)
     return None
 
 main()
