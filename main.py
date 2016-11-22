@@ -271,6 +271,8 @@ def main():
     xlsx_file = r'tmo_shipment_details.xlsx'
 
     form_data = FormFill()
+    form_data.load_workbook(xlsx_file) #loads excel file
+    
     form_data.login(login_url, username, password) #logs user into site where form is located
     form_data.navigate_to_form(program_url, 'tmo 16.8') #navigates to form
     form_data.get_form_elements() #stores site elements from form

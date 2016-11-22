@@ -2,6 +2,7 @@
 from SiteModule import SiteCommands
 from selenium import webdriver
 import time
+import openpyxl
 
 '''
 used to store general info about the current order.
@@ -30,7 +31,6 @@ class OrderInfo(object):
 '''program specific classes are used on a case by case basis. They hold specific information
 to the class, and do not need to be instantiated.
 '''
-
 class TmoSupport(object):
     def __init__(self):
         #each 'e_' value holds the site's corresponding field, used to
@@ -106,8 +106,7 @@ class TmoSupport(object):
     def fill_form(self, orders):
         return None
 
-
-
+#main class. This is what is instantiated by you to use for the form filler.
 class FormFill(object):
     def __init__(self):
         self.username = 'zniemann'
@@ -120,12 +119,25 @@ class FormFill(object):
 
         self.wb = None #current workbook
         self.ws = None #current sheet in workbook
+        self.ws_total_rows = 0 #total number of rows in active ws
+        self.ws_total_cols = 0 #total number of columns in active ws
         self.all_stores = [] #list of all store numbers that have orders to be placed
                              #appended will be OrderInfo() objects
 
         self.supported_forms = [
             'tmo 16.8',
             ]
+
+    def load_workbook(self, wb_name): #do at the beginning of program
+        self.wb = openpyxl.load_workbook(wb_name)
+        self.ws = self.wb.active
+        self.ws_total_rows = self.ws.rows
+        self.ws_total_cols = self.ws.columns
+
+        return None
+
+    def get_excel_store_info(self): #reads store address from spreadsheet and stores for later user_pass
+        return None
 
     #login to site where the form to fill exists
     def login(self, url, user_login, user_pass): #login first
@@ -150,13 +162,16 @@ class FormFill(object):
 
         return None
 
-
     def get_form_elements(self): #use after navigating to form page
         self.program_form.get_form_elements(self.browser)
         #^THIS CALL AND PARAMETERS SHOULD BE THE SAME, REGARDLESS OF THE PROGRAM.
         #THIS WILL KEEP IT SIMPLE SO THERE WON'T HAVE TO BE A TON OF CHECKS TO DETERMINE WHICH FORM VALUES TO USE.
 
         return None
+
+    def write_to_form(self): #writes all info from spreadsheet & order to form
+        return None
+
 
     #adds all the stores to the store list
     def store_setup(self, stores_list):
