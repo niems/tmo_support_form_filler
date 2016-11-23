@@ -1,5 +1,6 @@
 
 from SiteModule import SiteCommands
+from ExcelModule import ExcelCommands
 from selenium import webdriver
 import time
 import openpyxl
@@ -12,7 +13,11 @@ the values from the spreadsheet
 '''
 class OrderInfo(object):
     def __init__(self): #excel values for current order(store info)
-        self.store_id_xlsx = None
+        self.store_row = None #row the store number is found on. All above data is pulled
+                              #from this row
+
+        self.store_num = None #ex. '952' from 'TMO-952'
+        self.store_id_xlsx = None #ex 'TMO-952'
         self.order_type_xlsx = None
         self.company_name_xlsx = None
         self.first_name_xlsx = None
@@ -23,9 +28,11 @@ class OrderInfo(object):
         self.state_xlsx = None
         self.zip_xlsx = None
         self.email_xlsx = None
+        self.phone_xlsx = None
+        self.ship_service_xlsx = None
 
     def __str__(self):
-        return '{}'.format(self.store_id)
+        return '{}'.format(self.store_id_xlsx)
 
 
 '''program specific classes are used on a case by case basis. They hold specific information
@@ -55,7 +62,8 @@ class TmoSupport(object):
         self.full_store_name = 'T-Mobile Store '
         self.sheet_categories = {'store id' : 2,
                                  'address 1' : 30,
-                                 'address 2' : 31,
+                                 'city' : 31,
+                                 'state' : 32,
                                  'zip' : 33}
 
         #the 'e_default' are values that are default in the form
@@ -66,6 +74,7 @@ class TmoSupport(object):
 
         #keys used to navigate through submenus for the default form fill
         self.keys_default_ship_service = 'fff' #2 day shipping
+        self.keys_default_order_type = 'r' #replacement order type
 
     #navigates to the form for t-mobile support
     def navigate_to_form(self, browser): #needs to support all tmo programs, not just 16.8
@@ -96,7 +105,7 @@ class TmoSupport(object):
 
         self.e_city = SiteCommands.find_element_by_id(browser, 'eucity') #browser.find_element_by_id('eucity')
         #state = browser.find_element_by_id('')
-        self.e_zipcode = SiteCommands.find_element_by_id(browser, 'euzip') #browser.find_element_by_id('euzip')
+        self.e_zip = SiteCommands.find_element_by_id(browser, 'euzip') #browser.find_element_by_id('euzip')
         self.e_email = SiteCommands.find_element_by_id(browser, 'euemail1' ) #browser.find_element_by_id('euemail1')
         self.e_confirm_email = SiteCommands.find_element_by_id(browser, 'euemail2') #browser.find_element_by_id('euemail2')
         self.e_phone = SiteCommands.find_element_by_id(browser, 'euphone') #browser.find_element_by_id('euphone')
@@ -113,14 +122,13 @@ class FormFill(object):
         self.password = 'paluxy61'
         self.browser = webdriver.Firefox()
         self.program_form = None #form filler data; specified under 'navigate_to_form()'
-        self.store_info = OrderInfo() #info for the current store
-        self.store_row = None #row the store number is found on. All above data is pulled
-                              #from this row
+        #self.store_info = None #info for the current store
 
         self.wb = None #current workbook
         self.ws = None #current sheet in workbook
         self.ws_total_rows = 0 #total number of rows in active ws
         self.ws_total_cols = 0 #total number of columns in active ws
+
         self.all_stores = [] #list of all store numbers that have orders to be placed
                              #appended will be OrderInfo() objects
 
@@ -131,12 +139,67 @@ class FormFill(object):
     def load_workbook(self, wb_name): #do at the beginning of program
         self.wb = openpyxl.load_workbook(wb_name)
         self.ws = self.wb.active
-        self.ws_total_rows = self.ws.rows
-        self.ws_total_cols = self.ws.columns
+        self.ws_total_rows = len( list(self.ws.rows) ) #total rows in the active worksheet
+        self.ws_total_cols = len( list(self.ws.columns) ) #total columns in the active worksheet
+
+        return None
+
+    def get_form_program(self, program_name): #gets the current program
+        if program_name in self.supported_forms:
+            if program_name == 'tmo 16.8':
+                self.program_form = TmoSupport()
+                print('current program: Tmo support')
 
         return None
 
     def get_excel_store_info(self): #reads store address from spreadsheet and stores for later user_pass
+        store_data = [] #holds an OrderInfo store data object for each store
+        for i in range( len(self.all_stores) ):
+            self.all_stores[i] = self.program_form.partial_store_name + self.all_stores[i]
+
+            print('current store: {}'.format(self.all_stores[i]) )
+            store_info = OrderInfo()
+            temp = ExcelCommands.is_value_in_sheet(self.ws,
+                                                   [self.program_form.sheet_categories['store id'],
+                                                    self.program_form.sheet_categories['store id']],
+                                                   [1, -1],
+                                                    self.all_stores[i])
+            print('temp val: {}'.format(temp) )
+
+            if temp is not None: #get info for store
+                store_info.store_row = temp[0] #row of current store info
+
+                store_info.store_id_xlsx = ExcelCommands.get_cell_value(self.ws,
+                                                                             self.program_form.sheet_categories['store id'],
+                                                                             store_info.store_row)
+
+                store_info.address_1_xlsx = ExcelCommands.get_cell_value(self.ws,
+                                                                              self.program_form.sheet_categories['address 1'],
+                                                                              store_info.store_row)
+
+                store_info.city_xlsx = ExcelCommands.get_cell_value(self.ws,
+                                                                         self.program_form.sheet_categories['city'],
+                                                                         store_info.store_row)
+
+                store_info.state_xlsx = ExcelCommands.get_cell_value(self.ws,
+                                                                          self.program_form.sheet_categories['state'],
+                                                                          store_info.store_row)
+
+                store_info.zip_xlsx = ExcelCommands.get_cell_value(self.ws,
+                                                                        self.program_form.sheet_categories['zip'],
+                                                                        store_info.store_row)
+
+                store_info.order_type_xlsx = self.program_form.keys_default_order_type
+                store_info.company_name_xlsx = self.program_form.full_store_name + self.all_stores[i]
+                store_info.first_name_xlsx = self.program_form.e_default_first_name
+                store_info.last_name_xlsx = self.program_form.e_default_last_name
+                store_info.email_xlsx = self.program_form.e_default_email
+                store_info.phone_xlsx = self.program_form.e_default_phone
+                store_info.ship_service_xlsx = self.program_form.keys_default_ship_service
+
+                #store_data.append(self.store_info)
+                self.all_stores[i] = store_info
+
         return None
 
     #login to site where the form to fill exists
@@ -154,11 +217,7 @@ class FormFill(object):
 
     def navigate_to_form(self, url, form_name): #use after logged in
         SiteCommands.navigate_to_url(self.browser, url, 0.1)
-
-        if form_name in self.supported_forms:
-            if form_name == 'tmo 16.8':
-                self.program_form = TmoSupport()
-                self.program_form.navigate_to_form(self.browser)
+        self.program_form.navigate_to_form(self.browser)
 
         return None
 
@@ -170,6 +229,72 @@ class FormFill(object):
         return None
 
     def write_to_form(self): #writes all info from spreadsheet & order to form
+        for i in range( len(self.all_stores) ):
+
+            print('store id')
+            SiteCommands.send_keys(self.program_form.e_store_id,
+                                   self.all_stores[i].store_id_xlsx,
+                                   0)
+
+            print('order type')
+            SiteCommands.send_keys(self.program_form.e_order_type,
+                                   self.all_stores[i].order_type_xlsx,
+                                   0.2)
+
+            print('company name')
+            SiteCommands.send_keys(self.program_form.e_company_name,
+                                   self.all_stores[i].company_name_xlsx,
+                                   0)
+
+            print('first name: {}'.format(self.all_stores[i].first_name_xlsx) )
+            SiteCommands.send_keys(self.program_form.e_first_name,
+                                   self.all_stores[i].first_name_xlsx,
+                                   0)
+
+            print('last name')
+            SiteCommands.send_keys(self.program_form.e_last_name,
+                                   self.all_stores[i].last_name_xlsx,
+                                   0)
+
+            print('address 1')
+            SiteCommands.send_keys(self.program_form.e_address_1,
+                                   self.all_stores[i].address_1_xlsx,
+                                   0)
+
+            print('city')
+            SiteCommands.send_keys(self.program_form.e_city,
+                                   self.all_stores[i].city_xlsx,
+                                   0)
+
+            #state
+
+            print('zip')
+            SiteCommands.send_keys(self.program_form.e_zip,
+                                   self.all_stores[i].zip_xlsx,
+                                   0)
+
+            print('email')
+            SiteCommands.send_keys(self.program_form.e_email,
+                                   self.all_stores[i].email_xlsx,
+                                   0)
+
+            print('confirm email')
+            SiteCommands.send_keys(self.program_form.e_confirm_email,
+                                   self.all_stores[i].email_xlsx,
+                                   0)
+
+            print('phone')
+            SiteCommands.send_keys(self.program_form.e_phone,
+                                   self.all_stores[i].phone_xlsx,
+                                   0)
+
+            print('ship service')
+            SiteCommands.send_keys(self.program_form.e_ship_service,
+                                   self.all_stores[i].ship_service_xlsx,
+                                   0.2)
+
+            input() #pause
+
         return None
 
 

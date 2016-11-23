@@ -6,6 +6,7 @@ import datetime
 from SiteModule import SiteCommands
 import FormFill
 from FormFill import FormFill
+import sys
 
 date_obj = datetime.datetime.now()
 time_out_limit = 10 #number of seconds before the site times out from trying to find an element
@@ -262,8 +263,16 @@ def tmo_form_fill(browser = None, wb_name = ''):
 
     return None
 
+def get_stores():
+    if len(sys.argv) > 1:
+        return sys.argv[1:]
+
+    return None
+
 def main():
     #browser = webdriver.Firefox()
+    example_stores = ['4176', '4200', '9513']
+
     username = 'zniemann'
     password = 'paluxy61'
     login_url = r'https://www.viennachannels.com/adminlogin.php'
@@ -271,11 +280,19 @@ def main():
     xlsx_file = r'tmo_shipment_details.xlsx'
 
     form_data = FormFill()
+    form_data.all_stores = example_stores #get_stores()
+    form_data.get_form_program('tmo 16.8')
+
     form_data.load_workbook(xlsx_file) #loads excel file
-    
+    form_data.get_excel_store_info()
+
     form_data.login(login_url, username, password) #logs user into site where form is located
     form_data.navigate_to_form(program_url, 'tmo 16.8') #navigates to form
     form_data.get_form_elements() #stores site elements from form
+    form_data.write_to_form()
+
+    form_data.browser.close()
+    
     #login(browser, login_url, username, password)
     #program_selection(browser, program_url)
     #tmo_form_fill(browser, xlsx_file)

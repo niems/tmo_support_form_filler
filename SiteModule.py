@@ -84,12 +84,35 @@ class SiteCommands(object):
 
         return None
 
-    def send_keys(element, keys, pause_time):
-        for key in keys: #goes through all keys to send, one at a time
-            if pause_time > 0:
-                time.sleep(pause_time)
+    def is_input_valid(element, keys):
+        if element is None:
+            print('current element is None')
+            return False
 
-            element.send_keys(key)
+        elif keys is None:
+            print('current key is None')
+            return False
+
+        return True
+
+    def send_keys(element, keys, pause_time):
+
+        if element is None:
+            print('current element is None')
+            return None
+
+        elif keys is None:
+            print('current key is None')
+            return None
+
+        if pause_time == 0:
+            element.send_keys(keys)
+
+        else:
+            for key in keys: #goes through all keys to send, one at a time
+                #if pause_time > 0:
+                time.sleep(pause_time)
+                element.send_keys(key)
 
         return None
 
