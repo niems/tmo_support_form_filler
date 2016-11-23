@@ -112,9 +112,6 @@ class TmoSupport(object):
         self.e_ship_service = SiteCommands.find_element_by_id(browser, 'svcidus') #browser.find_element_by_id('svcidus')
         return None
 
-    def fill_form(self, orders):
-        return None
-
 #main class. This is what is instantiated by you to use for the form filler.
 class FormFill(object):
     def __init__(self):
@@ -155,18 +152,21 @@ class FormFill(object):
     def get_excel_store_info(self): #reads store address from spreadsheet and stores for later user_pass
         store_data = [] #holds an OrderInfo store data object for each store
         for i in range( len(self.all_stores) ):
-            self.all_stores[i] = self.program_form.partial_store_name + self.all_stores[i]
+            #self.all_stores[i] = self.program_form.partial_store_name + self.all_stores[i]
 
-            print('current store: {}'.format(self.all_stores[i]) )
+            #print('current store: {}'.format(self.all_stores[i]) )
             store_info = OrderInfo()
+            store_info.store_num = self.all_stores[i]
+            store_info.store_id_xlsx = self.program_form.partial_store_name + store_info.store_num
+
             temp = ExcelCommands.is_value_in_sheet(self.ws,
                                                    [self.program_form.sheet_categories['store id'],
                                                     self.program_form.sheet_categories['store id']],
                                                    [1, -1],
-                                                    self.all_stores[i])
-            print('temp val: {}'.format(temp) )
+                                                    store_info.store_id_xlsx)
 
             if temp is not None: #get info for store
+                store_info.store_num = self.all_stores[i] #store number
                 store_info.store_row = temp[0] #row of current store info
 
                 store_info.store_id_xlsx = ExcelCommands.get_cell_value(self.ws,
@@ -190,7 +190,7 @@ class FormFill(object):
                                                                         store_info.store_row)
 
                 store_info.order_type_xlsx = self.program_form.keys_default_order_type
-                store_info.company_name_xlsx = self.program_form.full_store_name + self.all_stores[i]
+                store_info.company_name_xlsx = self.program_form.full_store_name + store_info.store_num
                 store_info.first_name_xlsx = self.program_form.e_default_first_name
                 store_info.last_name_xlsx = self.program_form.e_default_last_name
                 store_info.email_xlsx = self.program_form.e_default_email

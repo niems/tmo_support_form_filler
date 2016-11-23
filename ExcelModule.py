@@ -136,7 +136,7 @@ class ExcelCommands(object):
 
 
             col_range, row_range = ExcelCommands.sheet_range(ws, col_range, row_range)
-            print('find row range: {}'.format(row_range) )
+            #print('find row range: {}'.format(row_range) )
             current_pos = ExcelCommands.does_value_exist(ws, col_range, row_range, key)
 
         except Exception as e:
