@@ -76,14 +76,6 @@ class SiteCommands(object):
 
         return found_element
 
-    def cycle_element_options(element, options, pause_time):
-
-        for option in options:
-            time.sleep(pause_time) #pauses for set amount of time before sending key
-            element.send_keys(option)
-
-        return None
-
     def is_input_valid(element, keys):
         if element is None:
             print('current element is None')

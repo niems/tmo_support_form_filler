@@ -57,6 +57,8 @@ class TmoSupport(object):
         self.e_phone = None
         self.e_ship_service = None
 
+        self.program_url = r'https://www.viennachannels.com/vca/user_mgmt.php'
+
         self.tmo_program_name = 'ssp16.8_tmo'
         self.partial_store_name = 'TMO-'
         self.full_store_name = 'T-Mobile Store '
@@ -114,6 +116,14 @@ class TmoSupport(object):
 
 #main class. This is what is instantiated by you to use for the form filler.
 class FormFill(object):
+    #optional
+    def load_page(self, pause_time):
+        self.browser.refresh()
+        time.sleep(pause_time)
+
+        return None
+
+    #FormFill process in top down order
     def __init__(self):
         self.username = 'zniemann'
         self.password = 'paluxy61'
@@ -199,6 +209,9 @@ class FormFill(object):
 
                 #store_data.append(self.store_info)
                 self.all_stores[i] = store_info
+
+            else:
+                print('FormFill() --> get_excel_store_info(): temp is None')
 
         return None
 
@@ -294,13 +307,6 @@ class FormFill(object):
                                    0.2)
 
             input() #pause
-
-        return None
-
-
-    #adds all the stores to the store list
-    def store_setup(self, stores_list):
-        for store in stores_list:
-            self.all_stores.append(store)
+            self.load_page(2.0)
 
         return None
