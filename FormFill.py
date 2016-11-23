@@ -117,14 +117,13 @@ class FormFill(object):
     def __init__(self):
         self.username = 'zniemann'
         self.password = 'paluxy61'
-        self.browser = webdriver.Firefox()
+        self.browser = None
         self.program_form = None #form filler data; specified under 'navigate_to_form()'
-        #self.store_info = None #info for the current store
 
         self.wb = None #current workbook
         self.ws = None #current sheet in workbook
         self.ws_total_rows = 0 #total number of rows in active ws
-        self.ws_total_cols = 0 #total number of columns in active ws
+        #self.ws_total_cols = 0 #total number of columns in active ws
 
         self.all_stores = [] #list of all store numbers that have orders to be placed
                              #appended will be OrderInfo() objects
@@ -134,10 +133,10 @@ class FormFill(object):
             ]
 
     def load_workbook(self, wb_name): #do at the beginning of program
-        self.wb = openpyxl.load_workbook(wb_name)
+        self.wb = openpyxl.load_workbook(wb_name, read_only = True)
         self.ws = self.wb.active
         self.ws_total_rows = len( list(self.ws.rows) ) #total rows in the active worksheet
-        self.ws_total_cols = len( list(self.ws.columns) ) #total columns in the active worksheet
+        #self.ws_total_cols = len( list(self.ws.columns) ) #total columns in the active worksheet
 
         return None
 
@@ -152,9 +151,6 @@ class FormFill(object):
     def get_excel_store_info(self): #reads store address from spreadsheet and stores for later user_pass
         store_data = [] #holds an OrderInfo store data object for each store
         for i in range( len(self.all_stores) ):
-            #self.all_stores[i] = self.program_form.partial_store_name + self.all_stores[i]
-
-            #print('current store: {}'.format(self.all_stores[i]) )
             store_info = OrderInfo()
             store_info.store_num = self.all_stores[i]
             store_info.store_id_xlsx = self.program_form.partial_store_name + store_info.store_num
@@ -170,24 +166,24 @@ class FormFill(object):
                 store_info.store_row = temp[0] #row of current store info
 
                 store_info.store_id_xlsx = ExcelCommands.get_cell_value(self.ws,
-                                                                             self.program_form.sheet_categories['store id'],
-                                                                             store_info.store_row)
+                                                                        self.program_form.sheet_categories['store id'],
+                                                                        store_info.store_row)
 
                 store_info.address_1_xlsx = ExcelCommands.get_cell_value(self.ws,
-                                                                              self.program_form.sheet_categories['address 1'],
-                                                                              store_info.store_row)
-
-                store_info.city_xlsx = ExcelCommands.get_cell_value(self.ws,
-                                                                         self.program_form.sheet_categories['city'],
+                                                                         self.program_form.sheet_categories['address 1'],
                                                                          store_info.store_row)
 
+                store_info.city_xlsx = ExcelCommands.get_cell_value(self.ws,
+                                                                    self.program_form.sheet_categories['city'],
+                                                                    store_info.store_row)
+
                 store_info.state_xlsx = ExcelCommands.get_cell_value(self.ws,
-                                                                          self.program_form.sheet_categories['state'],
-                                                                          store_info.store_row)
+                                                                     self.program_form.sheet_categories['state'],
+                                                                     store_info.store_row)
 
                 store_info.zip_xlsx = ExcelCommands.get_cell_value(self.ws,
-                                                                        self.program_form.sheet_categories['zip'],
-                                                                        store_info.store_row)
+                                                                   self.program_form.sheet_categories['zip'],
+                                                                   store_info.store_row)
 
                 store_info.order_type_xlsx = self.program_form.keys_default_order_type
                 store_info.company_name_xlsx = self.program_form.full_store_name + store_info.store_num
@@ -197,13 +193,14 @@ class FormFill(object):
                 store_info.phone_xlsx = self.program_form.e_default_phone
                 store_info.ship_service_xlsx = self.program_form.keys_default_ship_service
 
-                #store_data.append(self.store_info)
-                self.all_stores[i] = store_info
+                self.all_stores[i] = store_info #adds data for current store
 
         return None
 
     #login to site where the form to fill exists
     def login(self, url, user_login, user_pass): #login first
+        self.browser = webdriver.Firefox()
+
         self.browser.get(url)
         username = SiteCommands.find_element_by_name(self.browser, 'username')
         password = SiteCommands.find_element_by_name(self.browser, 'password')
@@ -294,13 +291,5 @@ class FormFill(object):
                                    0.2)
 
             input() #pause
-
-        return None
-
-
-    #adds all the stores to the store list
-    def store_setup(self, stores_list):
-        for store in stores_list:
-            self.all_stores.append(store)
 
         return None

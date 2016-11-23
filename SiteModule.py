@@ -76,25 +76,6 @@ class SiteCommands(object):
 
         return found_element
 
-    def cycle_element_options(element, options, pause_time):
-
-        for option in options:
-            time.sleep(pause_time) #pauses for set amount of time before sending key
-            element.send_keys(option)
-
-        return None
-
-    def is_input_valid(element, keys):
-        if element is None:
-            print('current element is None')
-            return False
-
-        elif keys is None:
-            print('current key is None')
-            return False
-
-        return True
-
     def send_keys(element, keys, pause_time):
 
         if element is None:
@@ -110,7 +91,6 @@ class SiteCommands(object):
 
         else:
             for key in keys: #goes through all keys to send, one at a time
-                #if pause_time > 0:
                 time.sleep(pause_time)
                 element.send_keys(key)
 

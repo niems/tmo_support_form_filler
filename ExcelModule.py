@@ -33,8 +33,6 @@ class ExcelCommands(object):
 
     #internal only
     def does_value_exist(ws, col_range, row_range, key):
-        #print('col type {}'.format(col_range) )
-        #print('row type {}'.format(row_range) )
         pos = None
         for row in range(row_range[0], row_range[1] + 1):
             for col in range(col_range[0], col_range[1] + 1):
@@ -46,8 +44,6 @@ class ExcelCommands(object):
 
     def get_cell_value(ws, col = 0, row = 0):
         return ws.cell(row = row, column = col).value
-
-
 
     def find_value(ws, col_range = [], row_range = [], key = None):
         try:
@@ -117,7 +113,6 @@ class ExcelCommands(object):
 
         return current_pos #position key was found in sheet
 
-
     def is_value_in_sheet(ws, col_range = [-1, -1], row_range = [-1, -1], key = None):
         try:
             current_pos = [0, 0, 0] #position of value to find, and value of cell
@@ -144,7 +139,6 @@ class ExcelCommands(object):
             Log.pause()
 
         return current_pos #position key was found in sheet
-
 
     def add_value_to_sheet(wb_name, ws = None, pos = [], value = None): #pos = [row,col]
         try:
