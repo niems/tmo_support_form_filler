@@ -112,6 +112,8 @@ class TmoSupport(object):
         self.e_ship_service = SiteCommands.find_element_by_id(browser, 'svcidus') #browser.find_element_by_id('svcidus')
         return None
 
+
+
 #main class. This is what is instantiated by you to use for the form filler.
 class FormFill(object):
     def __init__(self):
@@ -194,6 +196,9 @@ class FormFill(object):
                 store_info.ship_service_xlsx = self.program_form.keys_default_ship_service
 
                 self.all_stores[i] = store_info #adds data for current store
+
+            else:
+                print('temp is none')
 
         return None
 

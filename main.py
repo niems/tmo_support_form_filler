@@ -31,6 +31,9 @@ def run_form_fill(username, password, login_url, program_url, xlsx_name):
     form_data.get_form_elements() #stores site elements from form
     form_data.write_to_form()
 
+
+DEBUG = True
+
 def main():
     example_stores = ['4176', '4200', '9513']
 
@@ -41,9 +44,13 @@ def main():
     xlsx_file = r'tmo_shipment_details.xlsx'
 
     form_data = FormFill()
-    form_data.all_stores = get_stores()
 
-    if form_data.all_stores is None:
+    form_data.all_stores = example_stores
+
+    if form_data.all_stores == None:
+        form_data.all_stores = example_stores
+
+    if DEBUG:
         form_data.all_stores = example_stores
 
     form_data.get_form_program('tmo 16.8')
