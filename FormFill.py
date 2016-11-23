@@ -245,6 +245,9 @@ class FormFill(object):
         for i in range( len(self.all_stores) ):
 
             print('store id')
+            print(self.program_form.e_store_id)
+            print(self.all_stores[i].store_id_xlsx)
+
             SiteCommands.send_keys(self.program_form.e_store_id,
                                    self.all_stores[i].store_id_xlsx,
                                    0)
@@ -308,5 +311,6 @@ class FormFill(object):
 
             input() #pause
             self.load_page(2.0)
+            self.get_form_elements()
 
         return None

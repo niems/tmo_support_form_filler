@@ -8,7 +8,6 @@ def get_stores():
     return None
 
 def main():
-    #browser = webdriver.Firefox()
     example_stores = ['4176', '4200', '9513']
 
     username = 'zniemann'
